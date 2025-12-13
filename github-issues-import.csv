@@ -1,0 +1,166 @@
+Title,Body,Labels,Milestone
+PRD v1 — Contrato do produto (estados + zero interação),"**Descrição**
+Documentar requisitos do MVP: estados do app (Protegido/Aprendendo/Intervenção), política “zero interação”, restrições de privacidade, e o que NÃO entra no escopo.
+
+**Critérios de aceitação**
+- Documento descreve os 3 estados com gatilhos objetivos
+- Lista de permissões mínimas e quando solicitar
+- “Notificações OFF por padrão” registrado como regra
+- Fora de escopo explícito: feed, login, sync de contatos, anúncios","epic/product,prio/P0,type/doc,area/product",Fase 0
+"Fluxos (FigJam) — Ativação, Chamada, Revisão, Reset","**Descrição**
+Criar fluxos simples com 4 jornadas: (1) ativar proteção, (2) chamada recebida e decisão, (3) revisão de bloqueios, (4) apagar histórico local.
+
+**Critérios de aceitação**
+- 4 fluxos desenhados com início/fim e estados
+- Inclui pontos de permissão (só quando necessário)
+- Inclui comportamento com notificações OFF","epic/product,prio/P0,type/doc,area/product",Fase 0
+Rules Engine v1 — Sinais/pesos/thresholds + cenários,"**Descrição**
+Consolidar sinais/pesos/thresholds (ALLOW/SILENCE/BLOCK) e cenários de teste.
+
+**Critérios de aceitação**
+- Tabela de sinais/pesos publicada
+- Thresholds definidos (≥6 block, 4–5 silence, ≤3 allow)
+- 8+ cenários cobrindo: entregador, robocall, golpe insistente, hospital, número salvo, allowlist, marcado spam, burst multi-números","epic/core,prio/P0,type/doc,area/core",Fase 0
+Permissões Android — lista + justificativa Play Console,"**Descrição**
+Listar permissões e explicar por que são necessárias; texto pronto para Play Store (Data safety / Permissions).
+
+**Critérios de aceitação**
+- Somente permissões indispensáveis listadas
+- Texto pronto para Play Store “Data safety / Permissions”
+- Alternativas por versão Android anotadas","epic/privacy,prio/P0,type/doc,area/privacy",Fase 0
+Repo Android — Kotlin + Compose + estrutura de módulos,"**Descrição**
+Criar projeto Android com Kotlin e Compose. Estruturar módulos/pacotes: core, data, ui, screening.
+
+**Critérios de aceitação**
+- App compila e roda em emulador
+- Estrutura de pacotes definida
+- Configs básicas (minSdk/targetSdk) definidas","epic/infra,prio/P0,type/chore,area/infra",Fase 1
+CI — GitHub Actions (build + lint + testes),"**Descrição**
+Pipeline CI para build debug, rodar unit tests e static analysis.
+
+**Critérios de aceitação**
+- Workflow em PR: build + testes + lint
+- Falha bloqueia merge (branch protection recomendado)
+- Artefato APK debug opcional","epic/infra,prio/P0,type/chore,area/qa",Fase 1
+Qualidade — detekt + ktlint,"**Descrição**
+Integrar detekt e ktlint para manter base limpa.
+
+**Critérios de aceitação**
+- Rodam local e no CI
+- Regras mínimas sem atrito excessivo","epic/infra,prio/P1,type/chore,area/qa",Fase 1
+DB Room v1 — schema mínimo,"**Descrição**
+Implementar Room com tabelas: CallEvent, NumberProfile, RulesConfig, UserOverrides.
+
+**Critérios de aceitação**
+- Migrações versionadas
+- CRUD básico funcionando
+- Índices para consultas por número e janelas temporais","epic/data,prio/P0,type/feature,area/data",Fase 1
+Retenção/compactação — limpeza automática (30 dias),"**Descrição**
+Worker diário para apagar eventos antigos e compactar perfis.
+
+**Critérios de aceitação**
+- Mantém apenas últimos 30 dias
+- Respeita Doze / baixo impacto em bateria
+- Logs internos mostram execução e resultados","epic/data,prio/P1,type/feature,area/data",Fase 2
+Call Screening — integrar API de screening,"**Descrição**
+Implementar serviço de call screening para receber chamadas e aplicar decisão quando suportado.
+
+**Critérios de aceitação**
+- Evento de chamada recebido
+- Número normalizado (E.164 quando possível)
+- Decisão aplicada quando suportado
+- Degradação graciosa quando recurso não estiver disponível","epic/core,prio/P0,type/feature,area/core",Fase 1
+Pipeline — evento -> features -> score -> decisão,"**Descrição**
+Pipeline determinístico: normaliza número, coleta features, calcula score, aplica thresholds/exceções, grava CallEvent e atualiza NumberProfile.
+
+**Critérios de aceitação**
+- Score e reason codes armazenados localmente
+- Decisão reproduzível (mesmas entradas = mesma saída)
+- Caminho quente com baixa latência (meta interna)","epic/core,prio/P0,type/feature,area/core",Fase 1
+Reason Codes — explicação interna,"**Descrição**
+Registrar motivos de decisão com enums (ANDROID_SPAM, SHORT_CALL, BURST_SAME, ALLOWLIST_DURATION etc).
+
+**Critérios de aceitação**
+- Toda decisão tem 1+ reason codes
+- UI de revisão mostra resumo simples do motivo","epic/core,prio/P1,type/feature,area/core",Fase 1
+Feature store — janelas (5m/10m/24h/7d),"**Descrição**
+Calcular métricas: contagem de tentativas, números únicos, duração média quando atendido, padrões de horário.
+
+**Critérios de aceitação**
+- Consultas eficientes (evitar varrer histórico inteiro)
+- Perfis atualizam incrementalmente","epic/intelligence,prio/P0,type/feature,area/data",Fase 1
+Allowlist automática — duração atendida >= 20s (TTL 30 dias),"**Descrição**
+Se usuário atender e conversar ≥20s, permitir sempre por 30 dias (TTL), sem acesso a contatos.
+
+**Critérios de aceitação**
+- Regra aplicada automaticamente
+- TTL expira corretamente
+- Não depende de permissão de contatos","epic/intelligence,prio/P0,type/feature,area/core",Fase 1
+Regra “emergência condicional” (SILENCE->ALLOW na 2ª em 5 min),"**Descrição**
+Implementar promoção SILENCE->ALLOW na 2ª tentativa em 5 min quando não houver sinais fortes (ANDROID_SPAM, SHORT_CALL, BURST_MANY).
+
+**Critérios de aceitação**
+- Não aplica com sinais fortes
+- Aplica quando score ficaria 4–5 por repetição
+- Testes cobrindo entregador vs spam insistente","epic/intelligence,prio/P1,type/feature,area/core",Fase 1
+UI Home — estado (Protegido/Aprendendo/Intervenção) + contadores,"**Descrição**
+Tela principal com estado atual, bloqueios últimos 7 dias e botão “Ativar proteção” quando necessário.
+
+**Critérios de aceitação**
+- Sem onboarding longo
+- Estado reflete critérios objetivos
+- Sem banners/upsell","epic/ui,prio/P0,type/feature,area/ui",Fase 1
+UI Regras — 3–6 toggles + slider de agressividade,"**Descrição**
+Tela de regras com toggles (ex.: usar sinal Android spam, silenciar desconhecidos repetidos, modo noite) + slider agressividade.
+
+**Critérios de aceitação**
+- Defaults conservadores nos 3 primeiros dias (Aprendendo)
+- Notificações OFF por padrão
+- Persistência em RulesConfig","epic/ui,prio/P0,type/feature,area/ui",Fase 1
+UI Revisão — bloqueios recentes + overrides (Allow/Block 30 dias),"**Descrição**
+Lista (ex.: 50 itens) com ações: Permitir sempre (30 dias), Bloquear sempre (30 dias), Desfazer.
+
+**Critérios de aceitação**
+- Ações criam/atualizam UserOverrides com TTL
+- Mostra motivo resumido (reason codes traduzidos)","epic/ui,prio/P0,type/feature,area/ui",Fase 1
+Botão paranoico — apagar histórico local (reset total),"**Descrição**
+Um botão que apaga DB/estado local e reseta o aprendizado.
+
+**Critérios de aceitação**
+- Apaga CallEvents e perfis
+- Volta para estado Aprendendo
+- Não gera chamadas de rede","epic/privacy,prio/P1,type/feature,area/privacy",Fase 2
+Performance — medir wakeups/CPU/RAM (checklist + relatório),"**Descrição**
+Criar checklist e testes de performance (manual + logs). Medir antes/depois.
+
+**Critérios de aceitação**
+- Relatório com métricas antes/depois
+- Ações de otimização listadas e aplicadas quando necessário","epic/perf,prio/P0,type/test,area/qa",Fase 2
+"Notificações agregadas (OFF por padrão, no máx 1/dia)","**Descrição**
+Implementar notificação diária opcional: “Hoje: X bloqueios, Y silenciados, revisar Z”.
+
+**Critérios de aceitação**
+- Default OFF
+- No máximo 1/dia
+- Nunca interrompe chamada em tempo real","epic/perf,prio/P1,type/feature,area/ui",Fase 2
+Backend (Laravel) — GET /reputation/delta (ETag + gzip + checksum),"**Descrição**
+Endpoint para entregar delta de reputação (hashes/pesos) com cache agressivo.
+
+**Critérios de aceitação**
+- Payload pequeno e cacheável (ETag)
+- gzip habilitado
+- checksum/assinatura disponível","epic/backend,prio/P2,type/feature,area/backend",Fase 3 (Opcional)
+Backend (Laravel) — POST /reputation/vote (rate limit + anti-abuso),"**Descrição**
+Endpoint de voto voluntário por hash com rate limit e validação anti-abuso.
+
+**Critérios de aceitação**
+- Rate limiting
+- Storage: hash, weight, first_seen, last_seen
+- Logs mínimos para auditoria","epic/backend,prio/P2,type/feature,area/backend",Fase 3 (Opcional)
+App — sync reputação 1x/dia (Wi-Fi) + aplicar como sinal fraco,"**Descrição**
+Baixar reputação 1x/dia (preferência Wi-Fi), opt-in explícito, aplicar como sinal fraco.
+
+**Critérios de aceitação**
+- Opt-in explícito e reversível
+- Nunca bloquear apenas por reputação comunitária
+- Respeita economia de bateria (WorkManager)","epic/backend,prio/P2,type/feature,area/core",Fase 3 (Opcional)
