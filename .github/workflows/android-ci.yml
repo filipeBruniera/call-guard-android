@@ -21,11 +21,12 @@ jobs:
           java-version: "17"
           cache: gradle
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      # Se você ainda NÃO tiver o projeto Android criado, isso vai falhar (e está OK).
-      # Assim que a #21 subir, esse mesmo CI já passa.
       - name: Build (debug)
         run: ./gradlew assembleDebug --stacktrace
 
